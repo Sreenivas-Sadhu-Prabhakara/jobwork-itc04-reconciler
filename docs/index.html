@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; form-action 'self'">
+  <title>Job-work challan tracker and ITC-04 reconciler · Open MSME</title>
+  <meta name="description" content="A free single-binary tool for small manufacturers in India: track delivery challans for goods sent out for job work, see what is still with each job worker, catch quantities about to become a deemed supply, and prepare the Form ITC-04 figures for a filing period.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Job-work challan tracker and ITC-04 reconciler · Open MSME">
+  <meta property="og:description" content="Track job-work challans, know what is still with each job worker, and prepare Form ITC-04 — one offline binary, your data stays on your machine.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/accent.css">
+  <script src="assets/theme-init.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="https://sreenivas-sadhu-prabhakara.github.io/openmsme/">
+        <span class="dot"></span><b>Open MSME</b><span class="tag">job-work ITC-04</span>
+      </a>
+      <span class="sp"></span>
+      <a class="home" href="https://sreenivas-sadhu-prabhakara.github.io/openmsme/">All tools</a>
+      <button class="themer" data-themer type="button">Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow">Manufacturing · India</div>
+        <h1>Job-work challan tracker and ITC-04 reconciler for manufacturers</h1>
+        <p class="lede">Goods you send out for job work have to come back within a year — three for capital goods — or they count as a supply you owe tax on. This tool keeps the challan register, works out every deadline, tells you what is still with each job worker, and prepares the figures for a Form ITC-04 filing period.</p>
+        <div class="who">
+          <span class="pill">Small manufacturers who send goods out for job-work</span>
+          <span class="pill reg">CGST s.143 · Rule 45 · Form ITC-04</span>
+          <span class="pill">Runs offline · one binary</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <section class="prose">
+        <h2>What it does</h2>
+        <p>A job-work register is simple to keep and easy to lose track of. Material goes out to a plater, a machinist, a dyer; some of it comes back in instalments, some of it sits there for months, and the deadline that matters is counted from the challan date — one challan at a time. Miss it and the quantity still out becomes a <strong>deemed supply</strong> back-dated to the day it left your gate.</p>
+        <p>This tool keeps that register and does the counting for you:</p>
+        <ul>
+          <li>Records every delivery challan for goods <strong>sent out</strong>, and every quantity <strong>received back</strong> against it — partial returns, in as many instalments as it takes.</li>
+          <li>Works out each challan's <strong>return deadline</strong>: one year for inputs, three years for capital goods, by calendar arithmetic from the challan date.</li>
+          <li>Shows what is <strong>still with each job worker</strong>, and a work list of everything overdue or falling due inside a window you choose, worst first.</li>
+          <li>Pro-rates the challan's taxable value by the quantity still out, so you can see the <strong>value a deemed supply would fall on</strong> before it does.</li>
+          <li>Rolls a <strong>filing period</strong> up by job worker and hands you the figures as <strong>JSON and CSV</strong> to key into Form ITC-04.</li>
+          <li>Imports and exports the register as <strong>CSV</strong>, so a register already in a spreadsheet can come straight in and a backup is one click away.</li>
+        </ul>
+
+        <h2>Who it's for</h2>
+        <p>Small manufacturers who send goods out for job-work: fabricators, machine shops, textile and garment units, plating and heat-treatment work, printers, food processors — anyone who moves material to another GSTIN under a delivery challan and has to report it. It suits the principal, not the job worker: the deadlines and the ITC-04 obligation sit with whoever sent the goods out.</p>
+        <p>You need no accounting system and no internet connection. If you keep your challans in a notebook or a spreadsheet today, this is the next step up.</p>
+
+        <h2>The rule it implements</h2>
+        <p><strong>Section 143 of the CGST Act, 2017</strong> lets a registered person — the <em>principal</em> — send inputs or capital goods to a job worker without paying tax, provided they are brought back, or supplied from the job worker's premises, within:</p>
+        <ul>
+          <li><strong>one year</strong> for <strong>inputs</strong>, and</li>
+          <li><strong>three years</strong> for <strong>capital goods</strong>, under section 143(1)(a).</li>
+        </ul>
+        <p>If they are not, <strong>sections 143(3) and 143(4)</strong> treat the goods as having been supplied to the job worker <strong>on the day they were sent out</strong> — tax falls due from that earlier date, with interest. The proviso to section 143(1) puts <strong>moulds and dies, jigs and fixtures, and tools</strong> outside that time limit.</p>
+        <p><strong>Rule 45 of the CGST Rules, 2017</strong> requires the goods to move under a <strong>delivery challan</strong> containing the particulars of rule 55, and the challans of a period to be reported in <strong>Form GST ITC-04</strong>. Rule 45(3), as substituted with effect from <strong>1 October 2021</strong>, sets the period by turnover:</p>
+        <ul>
+          <li>annual aggregate turnover in the preceding financial year <strong>above ₹5 crore</strong> → <strong>half-yearly</strong> (April–September, October–March);</li>
+          <li>annual aggregate turnover <strong>up to ₹5 crore</strong> → <strong>once a financial year</strong>.</li>
+        </ul>
+        <p>Either is due on the <strong>25th day of the month after the period ends</strong>, unless the Commissioner extends it. Before 1 October 2021 every principal filed <strong>quarterly</strong>, which is why this tool still offers a quarterly period — it is also a useful way to review a long one.</p>
+        <p>Those four figures — one year, three years, ₹5 crore, the 25th — are defined as <strong>named constants in one place</strong> in the source and are editable under <strong>Settings</strong>, so the tool survives the next amendment. Confirm them against the current Act and Rules before you rely on them.</p>
+
+        <h2>Install &amp; run</h2>
+        <p>One binary, the Go standard library and nothing else — no database to install, no packages to fetch, no build step for the interface.</p>
+<pre># build it
+git clone https://github.com/sreenivas-sadhu-prabhakara/jobwork-itc04-reconciler.git
+cd jobwork-itc04-reconciler
+go build -o jobwork-itc04-reconciler .
+
+# run it, then open http://127.0.0.1:8080 in a browser
+./jobwork-itc04-reconciler
+
+# or run it straight from the source
+go run .
+
+# another port, and the register somewhere of your choosing
+./jobwork-itc04-reconciler -addr 127.0.0.1:9000 -data ~/accounts/job-work-2024-25.json</pre>
+        <p>It serves the interface on <code>127.0.0.1</code> — the machine it is running on, not the network — and keeps the register in <code>./jobwork-itc04-reconciler-data.json</code> unless you point <code>-data</code> somewhere else. Stop it with Ctrl-C.</p>
+
+        <h2>How it goes in practice</h2>
+        <ol class="steps">
+          <li>Enter your GSTIN and last year's turnover once, under <strong>Settings</strong>, so the tool knows which filing period applies to you.</li>
+          <li>Record each delivery challan as the goods leave: job worker, description, quantity, unit and the taxable value tax would fall on.</li>
+          <li>Record quantities as they come back, against the challan they belong to. The tool keeps the running balance per challan.</li>
+          <li>Watch the dashboard. Anything overdue is listed first, with the value already a deemed supply; anything falling due inside your window is next.</li>
+          <li>At the end of a filing period, pick the period, prepare it, and download the JSON and CSV to key into Form ITC-04.</li>
+        </ol>
+
+        <h2>What it stores</h2>
+        <p>One JSON file on your own machine — the challans, your own details and the statutory figures in force. Nothing else, nowhere else:</p>
+        <ul>
+          <li><strong>No outbound network calls.</strong> Not for fonts, not for analytics, not for updates. The interface is built into the binary and served from it.</li>
+          <li><strong>No portal integration.</strong> This prepares the data for a filing; it does not file anything and has no connection to the GST portal.</li>
+          <li><strong>Written whole, atomically.</strong> Every change writes a temporary file beside the register and renames it over the old one, so an interrupted save leaves the previous register intact, never half of one. The file is written readable only by you.</li>
+          <li><strong>Yours to read.</strong> It is plain, indented JSON, and the CSV export round-trips back through the importer — so you are never locked in.</li>
+        </ul>
+
+        <h2>Features</h2>
+        <div class="featgrid">
+          <div class="feat">
+            <h3>One challan register</h3>
+            <p>Goods sent out and goods received back, in one place, with the job worker's GSTIN, HSN, quantity, unit and taxable value each challan carries.</p>
+          </div>
+          <div class="feat">
+            <h3>Deadlines, counted properly</h3>
+            <p>One year for inputs, three for capital goods, by calendar arithmetic. A challan dated 29 February falls due on 1 March — the tool knows, and is tested on it.</p>
+          </div>
+          <div class="feat">
+            <h3>Partial returns</h3>
+            <p>Quantities come back in instalments and settle against the challan they left on. Anything recorded back twice is flagged rather than quietly cancelling a real exposure.</p>
+          </div>
+          <div class="feat">
+            <h3>Deemed supply, in rupees</h3>
+            <p>The challan's taxable value pro-rated by the quantity still out — the value tax would fall on if the goods do not come back in time.</p>
+          </div>
+          <div class="feat">
+            <h3>A work list, worst first</h3>
+            <p>Everything already overdue, longest first, then everything falling due inside a window you set. The list you work through on a Monday morning.</p>
+          </div>
+          <div class="feat">
+            <h3>Position per job worker</h3>
+            <p>What each job worker is holding, what it is worth, how many of their challans are past the deadline, and the earliest deadline still open.</p>
+          </div>
+          <div class="feat">
+            <h3>ITC-04 period, two ways</h3>
+            <p>Pick a quarter, half year or financial year and download it as CSV for a spreadsheet or JSON to keep with the filing — grouped by job worker, with the due date.</p>
+          </div>
+          <div class="feat">
+            <h3>CSV in, CSV out</h3>
+            <p>Bring in a register you already keep in a spreadsheet: columns in any order, dates as <code>2024-10-05</code> or <code>05/10/2024</code>, amounts with rupee signs and lakh commas. Bad rows are reported by line, good rows still come in.</p>
+          </div>
+        </div>
+
+        <h2>Assumptions</h2>
+        <details class="assumptions" open>
+          <summary>What the tool assumes, and what it leaves to you</summary>
+          <p><strong>Deadlines</strong> run from the challan date and the deadline date itself is still within time; the day after it is not. Calendar arithmetic means a day that does not exist in the target year rolls forward, so 29 February plus one year is 1 March.</p>
+          <p><strong>Capital goods.</strong> The three-year period is applied to everything you mark as capital goods. The proviso to section 143(1) puts moulds and dies, jigs and fixtures, and tools outside the time limit altogether — keep those out of the register rather than recording them here.</p>
+          <p><strong>Outstanding quantity</strong> is the quantity sent less every quantity recorded back against that challan, whenever it came back. It is cumulative, not per filing period.</p>
+          <p><strong>Deemed supply value</strong> is taxable value × outstanding ÷ sent, rounded to paise. It is the value, not the tax: the tool applies no rate, computes no interest, and decides no place of supply. Section 143(4) also makes the job worker's waste and scrap a supply in its own right — that is outside this register.</p>
+          <p><strong>Filing frequency and due date.</strong> Half-yearly above ₹5 crore of annual aggregate turnover, once a financial year at or below it, due on the 25th of the following month — rule 45(3) with effect from 1 October 2021. The figures are editable, because thresholds and due dates change. Confirm the current position with the CGST Rules, a CBIC notification or your tax adviser.</p>
+          <p><strong>GSTINs</strong> are checked for the 15-character shape only — two-digit state code, PAN, entity code, a fixed letter and a check character. The check digit is not recomputed, so a GSTIN that passes may still not exist.</p>
+          <p><strong>Quantities</strong> are only added within a unit of measure. Where a total would mix kilograms with pieces the tool says so instead of pretending they add up.</p>
+          <p><strong>Form ITC-04 itself</strong> asks for the challans of the period grouped by job worker, with the goods received back shown against the challan they came back on. That is the shape of the export. The form's own table numbering is not reproduced here, because it has changed between versions of the form — read the figures across onto whichever version the portal is serving.</p>
+        </details>
+
+        <div class="note">This is a register and a calculator, not advice and not a filing. It prepares figures from what you enter; it cannot know what you did not record. Check every figure against your challans, and confirm every statutory period, threshold and due date with the current CGST Act and Rules or your own tax adviser, before you file anything.</div>
+
+        <h2>Licence</h2>
+        <p>MIT licensed, free forever, and open to read line by line — including the rules it applies, which live in one small package with tests covering the leap-year and partial-return cases.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <span>Open MSME · open-source tool for MSMEs in India &amp; the Philippines · MIT</span>
+      <span><a href="https://sreenivas-sadhu-prabhakara.github.io/openmsme/">All tools</a></span>
+    </div>
+  </footer>
+
+  <script src="assets/ui.js"></script>
+</body>
+</html>

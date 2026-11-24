@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; form-action 'self'">
+  <title>Job-work challan tracker and ITC-04 reconciler · Open MSME</title>
+  <meta name="description" content="Track delivery challans for goods sent out for job work, see what is still with each job worker, catch the quantities about to become a deemed supply, and prepare the Form ITC-04 figures for a filing period.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/accent.css">
+  <link rel="stylesheet" href="assets/layout.css">
+  <script src="assets/theme-init.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <span class="brand"><span class="dot"></span><b>Open MSME</b><span class="tag">job-work ITC-04</span></span>
+      <span class="sp"></span>
+      <a class="home" href="https://sreenivas-sadhu-prabhakara.github.io/openmsme/">All tools</a>
+      <button class="themer" data-themer type="button">Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow">Manufacturing · India</div>
+        <h1>Job-work challan tracker and ITC-04 reconciler for manufacturers</h1>
+        <p class="lede">Record every delivery challan for goods sent out for job work, see what is still with each job worker, catch the quantities about to become a deemed supply, and prepare the figures for a Form ITC-04 filing period.</p>
+        <div class="who">
+          <span class="pill">Small manufacturers who send goods out for job-work</span>
+          <span class="pill reg">CGST s.143 · Rule 45 · Form ITC-04</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <nav class="seg" id="tabs" aria-label="Sections">
+        <button type="button" data-panel="dash" aria-pressed="true">Dashboard</button>
+        <button type="button" data-panel="register" aria-pressed="false">Challans</button>
+        <button type="button" data-panel="record" aria-pressed="false">Record</button>
+        <button type="button" data-panel="filing" aria-pressed="false">ITC-04 period</button>
+        <button type="button" data-panel="data" aria-pressed="false">Import &amp; export</button>
+        <button type="button" data-panel="settings" aria-pressed="false">Settings</button>
+      </nav>
+
+      <div class="note" id="banner" hidden></div>
+
+      <!-- Dashboard ------------------------------------------------------- -->
+      <div id="panel-dash">
+        <div class="cols calc">
+          <section class="card">
+            <h2>Where the register stands</h2>
+            <div class="row2">
+              <div class="field">
+                <label for="as-of">As at <span class="hint">the date to judge the register on</span></label>
+                <div class="inp"><input type="date" id="as-of"></div>
+              </div>
+              <div class="field">
+                <label for="horizon">Warn about challans due within</label>
+                <div class="inp has-suf">
+                  <input type="number" id="horizon" min="0" step="1" inputmode="numeric" value="30">
+                  <span class="suf">days</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-primary">
+              <div class="k">Taxable value already a deemed supply</div>
+              <div class="v" id="d-overdue-value">—</div>
+              <div class="sub" id="d-overdue-sub">—</div>
+            </div>
+
+            <div class="table-scroll">
+              <table class="breakdown">
+                <tbody>
+                  <tr><td>Challans of goods sent out</td><td class="num" id="d-challans">—</td></tr>
+                  <tr class="sub"><td>Settled in full</td><td class="num" id="d-returned">—</td></tr>
+                  <tr class="sub"><td>Still within time</td><td class="num" id="d-pending">—</td></tr>
+                  <tr class="sub"><td>Past the return deadline</td><td class="num" id="d-overdue">—</td></tr>
+                  <tr><td>Quantity sent out</td><td class="num" id="d-qty-sent">—</td></tr>
+                  <tr><td>Quantity received back</td><td class="num" id="d-qty-returned">—</td></tr>
+                  <tr class="total"><td>Quantity still with job workers</td><td class="num" id="d-qty-out">—</td></tr>
+                  <tr><td>Taxable value of goods still out</td><td class="num" id="d-value-out">—</td></tr>
+                  <tr><td>Job workers</td><td class="num" id="d-workers">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="note" id="d-units" hidden>Quantities above add up different units of measure, so read them per job worker or per challan instead.</div>
+          </section>
+
+          <section class="card">
+            <h2>Overdue and falling due</h2>
+            <p class="assumptions" id="d-atrisk-empty">Nothing is overdue or falling due inside the window.</p>
+            <div class="table-scroll">
+              <table class="breakdown" id="d-atrisk-table" hidden>
+                <thead>
+                  <tr>
+                    <th>Challan</th>
+                    <th>Job worker</th>
+                    <th class="num">Still out</th>
+                    <th>Due</th>
+                    <th class="num">At risk</th>
+                  </tr>
+                </thead>
+                <tbody id="d-atrisk"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <section class="card">
+          <h2>Outstanding with each job worker</h2>
+          <p class="assumptions" id="d-workers-empty">No challans recorded yet.</p>
+          <div class="table-scroll">
+            <table class="breakdown" id="d-workers-table" hidden>
+              <thead>
+                <tr>
+                  <th>Job worker</th>
+                  <th class="num">Challans</th>
+                  <th class="num">Still out</th>
+                  <th>Earliest deadline</th>
+                  <th class="num">Value still out</th>
+                </tr>
+              </thead>
+              <tbody id="d-workers-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card" id="d-orphan-card" hidden>
+          <h2>Returns that settle against nothing</h2>
+          <p class="assumptions">These records name a challan that is not in the register, so the quantity is reducing nothing. Usually the challan number was mis-keyed.</p>
+          <div class="table-scroll">
+            <table class="breakdown">
+              <thead>
+                <tr><th>Return</th><th>Date</th><th>Names challan</th><th class="num">Qty</th></tr>
+              </thead>
+              <tbody id="d-orphans"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Challans -------------------------------------------------------- -->
+      <div id="panel-register" hidden>
+        <section class="card">
+          <h2>Goods sent out</h2>
+          <p class="assumptions" id="r-sent-empty">No challans recorded yet. Use <strong>Record</strong> to add one, or <strong>Import &amp; export</strong> to bring in a CSV file.</p>
+          <div class="table-scroll">
+            <table class="breakdown" id="r-sent-table" hidden>
+              <thead>
+                <tr>
+                  <th>Challan</th>
+                  <th>Job worker</th>
+                  <th class="num">Sent / back / out</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="r-sent"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Goods received back</h2>
+          <p class="assumptions" id="r-back-empty">Nothing recorded as received back yet.</p>
+          <div class="table-scroll">
+            <table class="breakdown" id="r-back-table" hidden>
+              <thead>
+                <tr>
+                  <th>Return</th>
+                  <th>Date</th>
+                  <th>Against</th>
+                  <th class="num">Qty</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="r-back"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Record ---------------------------------------------------------- -->
+      <div id="panel-record" hidden>
+        <div class="cols calc">
+          <section class="card">
+            <h2>Goods sent out for job work</h2>
+            <form id="form-sent" autocomplete="off">
+              <div class="row2">
+                <div class="field">
+                  <label for="s-no">Challan number</label>
+                  <div class="inp"><input type="text" id="s-no" required maxlength="40" placeholder="DC/2024-25/001"></div>
+                </div>
+                <div class="field">
+                  <label for="s-date">Challan date</label>
+                  <div class="inp"><input type="date" id="s-date" required></div>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="s-gstin">Job worker GSTIN</label>
+                  <div class="inp"><input type="text" id="s-gstin" required maxlength="15" placeholder="29ABCDE1234F1Z5" list="gstin-list"></div>
+                </div>
+                <div class="field">
+                  <label for="s-name">Job worker name</label>
+                  <div class="inp"><input type="text" id="s-name" required maxlength="120" placeholder="Shree Plating Works"></div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="s-desc">Description of goods</label>
+                <div class="inp"><input type="text" id="s-desc" required maxlength="160" placeholder="MS brackets for plating"></div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="s-hsn">HSN <span class="hint">optional</span></label>
+                  <div class="inp"><input type="text" id="s-hsn" maxlength="8" inputmode="numeric" placeholder="7308"></div>
+                </div>
+                <div class="field">
+                  <label for="s-goods">Kind of goods</label>
+                  <div class="inp">
+                    <select id="s-goods">
+                      <option value="inputs">Inputs — one year to come back</option>
+                      <option value="capital">Capital goods — three years to come back</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="s-qty">Quantity</label>
+                  <div class="inp"><input type="number" id="s-qty" required min="0" step="any" inputmode="decimal" placeholder="100"></div>
+                </div>
+                <div class="field">
+                  <label for="s-uqc">Unit <span class="hint">UQC</span></label>
+                  <div class="inp"><input type="text" id="s-uqc" required maxlength="10" placeholder="KGS" list="uqc-list"></div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="s-value">Taxable value of the goods sent <span class="hint">the value tax would fall on</span></label>
+                <div class="inp has-pre">
+                  <span class="pre">₹</span>
+                  <input type="number" id="s-value" min="0" step="0.01" inputmode="decimal" placeholder="50000">
+                </div>
+              </div>
+              <div class="btnrow">
+                <button class="btn primary" type="submit">Record the challan</button>
+                <button class="btn ghost" type="reset">Clear</button>
+              </div>
+              <div class="note" id="form-sent-msg" hidden></div>
+            </form>
+          </section>
+
+          <section class="card">
+            <h2>Goods received back</h2>
+            <form id="form-return" autocomplete="off">
+              <div class="field">
+                <label for="b-against">Against which challan</label>
+                <div class="inp"><select id="b-against" required></select></div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="b-no">Return document number</label>
+                  <div class="inp"><input type="text" id="b-no" required maxlength="40" placeholder="JW/RET/001"></div>
+                </div>
+                <div class="field">
+                  <label for="b-date">Date received back</label>
+                  <div class="inp"><input type="date" id="b-date" required></div>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="b-qty">Quantity received back</label>
+                  <div class="inp"><input type="number" id="b-qty" required min="0" step="any" inputmode="decimal"></div>
+                </div>
+                <div class="field">
+                  <label for="b-uqc">Unit <span class="hint">taken from the challan</span></label>
+                  <div class="inp"><input type="text" id="b-uqc" maxlength="10" readonly></div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="b-desc">Description <span class="hint">optional, if it changed</span></label>
+                <div class="inp"><input type="text" id="b-desc" maxlength="160" placeholder="MS brackets, plated"></div>
+              </div>
+              <p class="assumptions" id="b-position">Pick a challan to see how much of it is still out.</p>
+              <div class="btnrow">
+                <button class="btn primary" type="submit">Record the return</button>
+                <button class="btn ghost" type="reset">Clear</button>
+              </div>
+              <div class="note" id="form-return-msg" hidden></div>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <!-- ITC-04 period --------------------------------------------------- -->
+      <div id="panel-filing" hidden>
+        <section class="card">
+          <h2>Prepare a Form ITC-04 period</h2>
+          <div class="field">
+            <label>Period</label>
+            <div class="seg" id="f-freq" role="group" aria-label="Filing frequency">
+              <button type="button" data-freq="half-yearly" aria-pressed="true">Half-yearly</button>
+              <button type="button" data-freq="annual" aria-pressed="false">Financial year</button>
+              <button type="button" data-freq="quarterly" aria-pressed="false">Quarterly</button>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="f-period">Which period</label>
+              <div class="inp"><select id="f-period"></select></div>
+            </div>
+            <div class="field">
+              <label for="f-asof">Judge the position as at</label>
+              <div class="inp"><input type="date" id="f-asof"></div>
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="btn primary" type="button" id="f-prepare">Prepare the period</button>
+            <a class="btn ghost" id="f-csv" href="api/itc04.csv" download>Download CSV</a>
+            <a class="btn ghost" id="f-json" href="api/itc04.json" download>Download JSON</a>
+          </div>
+          <div class="note" id="f-freq-note" hidden></div>
+        </section>
+
+        <section class="card" id="f-result" hidden>
+          <h2 id="f-title">Period</h2>
+          <div class="result-primary">
+            <div class="k">Taxable value of goods sent out in the period</div>
+            <div class="v" id="f-value">—</div>
+            <div class="sub" id="f-sub">—</div>
+          </div>
+          <div class="table-scroll">
+            <table class="breakdown">
+              <tbody>
+                <tr><td>Challans of goods sent out in the period</td><td class="num" id="f-challans">—</td></tr>
+                <tr><td>Quantity sent out</td><td class="num" id="f-qty-sent">—</td></tr>
+                <tr><td>Quantity received back in the period</td><td class="num" id="f-qty-back">—</td></tr>
+                <tr class="total"><td>Of the period's challans, still out</td><td class="num" id="f-qty-out">—</td></tr>
+                <tr><td>Past the return deadline</td><td class="num" id="f-overdue">—</td></tr>
+                <tr><td>Taxable value now a deemed supply</td><td class="num" id="f-deemed">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note" id="f-units" hidden>The period mixes units of measure, so the quantity totals above add up different units.</div>
+
+          <h3>By job worker</h3>
+          <div class="table-scroll">
+            <table class="breakdown">
+              <thead>
+                <tr>
+                  <th>Job worker</th>
+                  <th class="num">Sent</th>
+                  <th class="num">Back in period</th>
+                  <th class="num">Still out</th>
+                  <th class="num">Deemed supply</th>
+                </tr>
+              </thead>
+              <tbody id="f-workers"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Import & export ------------------------------------------------- -->
+      <div id="panel-data" hidden>
+        <div class="cols calc">
+          <section class="card">
+            <h2>Import challans from a CSV file</h2>
+            <p class="assumptions">The first row must be the column headings. Columns may be in any order, and extra columns are ignored. A row that cannot be used is reported by its line number and the rest are still brought in.</p>
+            <div class="field">
+              <label for="i-file">CSV file</label>
+              <div class="inp"><input type="file" id="i-file" accept=".csv,text/csv"></div>
+            </div>
+            <div class="btnrow">
+              <button class="btn primary" type="button" id="i-go">Import the file</button>
+              <a class="btn ghost" href="api/template.csv" download>Blank template</a>
+            </div>
+            <div class="note" id="i-msg" hidden></div>
+            <div class="table-scroll">
+              <table class="breakdown" id="i-rows-table" hidden>
+                <thead><tr><th class="num">Line</th><th>What was wrong</th></tr></thead>
+                <tbody id="i-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Export</h2>
+            <p class="assumptions">The register export carries every challan and every return. Importing it back gives the same register, so it doubles as a backup and as a way to edit in a spreadsheet.</p>
+            <div class="btnrow">
+              <a class="btn ghost" href="api/challans.csv" download>Register as CSV</a>
+            </div>
+            <h3>Column headings</h3>
+            <pre>Challan No, Date, Direction, Against Challan No,
+Job Worker GSTIN, Job Worker Name, Description, HSN,
+Qty, UQC, Taxable Value, Goods Type</pre>
+            <p class="assumptions"><strong>Direction</strong> is <code>sent</code> or <code>returned</code>; left blank, a row naming a challan to settle against is read as a return. <strong>Goods Type</strong> is <code>inputs</code> or <code>capital</code>, and blank is read as inputs. Dates may be written as <code>2024-10-05</code> or <code>05/10/2024</code>.</p>
+          </section>
+        </div>
+      </div>
+
+      <!-- Settings -------------------------------------------------------- -->
+      <div id="panel-settings" hidden>
+        <section class="card">
+          <h2>Your details and the figures in force</h2>
+          <form id="form-settings" autocomplete="off">
+            <div class="row2">
+              <div class="field">
+                <label for="p-name">Your business name <span class="hint">the principal</span></label>
+                <div class="inp"><input type="text" id="p-name" maxlength="120"></div>
+              </div>
+              <div class="field">
+                <label for="p-gstin">Your GSTIN</label>
+                <div class="inp"><input type="text" id="p-gstin" maxlength="15" placeholder="29ABCDE1234F1Z5"></div>
+              </div>
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label for="p-turnover">Annual aggregate turnover <span class="hint">preceding financial year</span></label>
+                <div class="inp has-pre">
+                  <span class="pre">₹</span>
+                  <input type="number" id="p-turnover" min="0" step="1" inputmode="decimal">
+                </div>
+              </div>
+              <div class="field">
+                <label for="p-horizon">Warn about challans due within</label>
+                <div class="inp has-suf">
+                  <input type="number" id="p-horizon" min="0" step="1" inputmode="numeric">
+                  <span class="suf">days</span>
+                </div>
+              </div>
+            </div>
+
+            <details class="assumptions">
+              <summary>Statutory figures — change these only if the law has changed</summary>
+              <div class="row2">
+                <div class="field">
+                  <label for="p-inputs-years">Years to bring inputs back</label>
+                  <div class="inp has-suf">
+                    <input type="number" id="p-inputs-years" min="1" max="20" step="1" inputmode="numeric">
+                    <span class="suf">yr</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="p-capital-years">Years to bring capital goods back</label>
+                  <div class="inp has-suf">
+                    <input type="number" id="p-capital-years" min="1" max="20" step="1" inputmode="numeric">
+                    <span class="suf">yr</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label for="p-threshold">Turnover above which the period is half-yearly</label>
+                  <div class="inp has-pre">
+                    <span class="pre">₹</span>
+                    <input type="number" id="p-threshold" min="0" step="1" inputmode="decimal">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="p-dueday">Filing is due on this day of the next month</label>
+                  <div class="inp"><input type="number" id="p-dueday" min="1" max="28" step="1" inputmode="numeric"></div>
+                </div>
+              </div>
+              <p>Confirm these against the current CGST Act and Rules before you rely on them. Changing a figure changes every deadline and due date the tool shows, including those already recorded.</p>
+            </details>
+
+            <div class="btnrow">
+              <button class="btn primary" type="submit">Save</button>
+            </div>
+            <div class="note" id="form-settings-msg" hidden></div>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Where the register is kept</h2>
+          <p class="assumptions">Everything is kept in one file on this machine, written whole after every change. Nothing is sent anywhere.</p>
+          <pre id="s-datafile">—</pre>
+        </section>
+      </div>
+
+      <datalist id="uqc-list">
+        <option value="KGS"></option>
+        <option value="NOS"></option>
+        <option value="MTR"></option>
+        <option value="SQM"></option>
+        <option value="LTR"></option>
+        <option value="TON"></option>
+        <option value="PCS"></option>
+        <option value="SET"></option>
+        <option value="BOX"></option>
+        <option value="ROL"></option>
+      </datalist>
+      <datalist id="gstin-list"></datalist>
+
+      <section class="prose">
+        <h2>The rule this applies</h2>
+        <p>Under <strong>section 143 of the CGST Act, 2017</strong> a principal may send inputs or capital goods to a job worker without paying tax, provided the goods are brought back — or supplied from the job worker's premises — within <strong>one year</strong> for inputs and <strong>three years</strong> for capital goods. If they are not, section 143(3) and 143(4) treat them as having been supplied to the job worker <strong>on the day they were sent out</strong>, and tax falls due from that day with interest.</p>
+        <p><strong>Rule 45 of the CGST Rules, 2017</strong> requires the goods to move under a <strong>delivery challan</strong> and the challans of a period to be reported in <strong>Form ITC-04</strong>. This tool keeps that register, works out each challan's deadline, pro-rates the taxable value of whatever is still out, and groups a period by job worker so the figures can be keyed into the return.</p>
+
+        <details class="assumptions">
+          <summary>Assumptions, and what this tool does not do</summary>
+          <p><strong>Deadlines</strong> are calendar arithmetic from the challan date: one year for inputs, three for capital goods. A challan dated 29 February falls due on 1 March of the target year, that date not existing there. The deadline date itself is still within time; the day after it is not.</p>
+          <p><strong>The three-year period does not apply</strong> to moulds and dies, jigs and fixtures, or tools sent out to a job worker — see the proviso to section 143(1). This tool applies three years to everything marked as capital goods, so keep those four kinds of item out of the register.</p>
+          <p><strong>Outstanding quantity</strong> is the quantity sent less every quantity recorded back against that challan, whenever it came back. Returns may be partial and may arrive in instalments. If more is recorded back than went out, the outstanding quantity is held at zero and the excess is flagged rather than quietly cancelling a real exposure elsewhere.</p>
+          <p><strong>Deemed supply value</strong> is the challan's taxable value pro-rated by quantity: value × outstanding ÷ sent. It is the value tax would fall on, not the tax. The tool does not apply a rate, work out interest, or decide the place of supply.</p>
+          <p><strong>Filing frequency.</strong> Rule 45(3), as substituted with effect from 1 October 2021, puts a principal whose annual aggregate turnover in the preceding financial year is <strong>above ₹5 crore</strong> on a <strong>half-yearly</strong> period (April–September and October–March) and one <strong>at or below ₹5 crore</strong> on a period of <strong>one financial year</strong>. Either is due on the <strong>25th</strong> of the month after the period ends, unless extended. Before 1 October 2021 every principal filed quarterly, which is why a quarterly period is still offered here. Confirm the current frequency, threshold and due date with the CGST Rules or your tax adviser — they are editable under <strong>Settings</strong>.</p>
+          <p><strong>GSTINs</strong> are checked for the 15-character shape only. The check digit is not recomputed, so a GSTIN that passes may still not exist.</p>
+          <p><strong>Quantities</strong> are added only within a unit of measure. Where a total would mix units the tool says so rather than implying that kilograms and pieces add up.</p>
+        </details>
+
+        <div class="note">This prepares the figures for a filing; it is not a filing. There is no connection to the GST portal, and no advice here is a substitute for your own tax adviser. Check every figure against your challans before you file.</div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <span>Open MSME · open-source tool for MSMEs in India &amp; the Philippines · MIT</span>
+      <span><a href="https://sreenivas-sadhu-prabhakara.github.io/openmsme/">All tools</a></span>
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
